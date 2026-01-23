@@ -26,9 +26,8 @@ def home():
         'service': 'Spatial Clustering API',
         'endpoints': {
             'clustering': 'POST /api/clustering',
-            'convert_shapefile': 'POST /api/convert-shapefile',
             'get_results': 'GET /api/results',
-            'get_geojson': 'GET /api/geojson'
+            'health': 'GET /health'
         }
     })
 
@@ -100,59 +99,6 @@ def clustering():
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/convert-shapefile', methods=['POST'])
-def convert_shapefile():
-    """Convert shapefile to GeoJSON with cluster data"""
-    try:
-        # Expecting shapefile components and cluster_results
-        if 'cluster_results' not in request.files:
-            return jsonify({'success': False, 'message': 'Cluster results required'}), 400
-        
-        # Save cluster results
-        cluster_file = request.files['cluster_results']
-        cluster_path = os.path.join(RESULTS_FOLDER, 'cluster_results.json')
-        cluster_file.save(cluster_path)
-        
-        # Shapefile path (should be uploaded separately or already exist)
-        shapefile_path = request.form.get('shapefile_path', 'map kelurahan/ADMINISTRASI_AR_DESAKEL.shp')
-        
-        # Output path
-        output_path = os.path.join(RESULTS_FOLDER, 'kelurahan_clusters.geojson')
-        
-        # Run conversion script
-        cmd = [
-            'python', 'convert_shapefile_to_geojson.py',
-            shapefile_path,
-            cluster_path,
-            output_path
-        ]
-        
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        
-        if result.returncode != 0:
-            return jsonify({
-                'success': False,
-                'message': 'Conversion failed',
-                'error': result.stderr,
-                'output': result.stdout
-            }), 500
-        
-        if os.path.exists(output_path):
-            return jsonify({
-                'success': True,
-                'message': 'GeoJSON created successfully'
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': 'GeoJSON file not created'
-            }), 500
-            
-    except subprocess.TimeoutExpired:
-        return jsonify({'success': False, 'message': 'Conversion timeout'}), 500
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
 @app.route('/api/results', methods=['GET'])
 def get_results():
     """Get clustering results"""
@@ -166,23 +112,6 @@ def get_results():
             results = json.load(f)
         
         return jsonify({'success': True, 'data': results})
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/geojson', methods=['GET'])
-def get_geojson():
-    """Get GeoJSON data"""
-    try:
-        geojson_path = os.path.join(RESULTS_FOLDER, 'kelurahan_clusters.geojson')
-        
-        if not os.path.exists(geojson_path):
-            return jsonify({'success': False, 'message': 'GeoJSON not found'}), 404
-        
-        with open(geojson_path, 'r', encoding='utf-8') as f:
-            geojson = json.load(f)
-        
-        return jsonify(geojson)
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500

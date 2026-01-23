@@ -1,8 +1,8 @@
 # Spatial Clustering Python API
 
-Flask API wrapper untuk clustering_script.py dan convert_shapefile_to_geojson.py
+Flask API untuk clustering analysis (tanpa geopandas - peta menggunakan marker point)
 
-## Deploy ke Railway
+## Deploy ke Render.com
 
 ### Langkah 1: Push ke GitHub
 ```bash
@@ -15,116 +15,60 @@ git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
 
-### Langkah 2: Deploy di Railway
-1. Buka https://railway.app
+### Langkah 2: Deploy di Render
+1. Buka https://render.com
 2. Login dengan GitHub
-3. Klik "New Project"
-4. Pilih "Deploy from GitHub repo"
-5. Pilih repository Anda
-6. Railway akan auto-detect dan deploy
+3. Klik "New +" → "Web Service"
+4. Connect repository Anda
+5. Configure:
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `gunicorn app:app --timeout 300`
+   - **Plan:** Free
+6. Deploy
 
 ### Langkah 3: Dapatkan URL
-Setelah deploy selesai, Railway akan memberikan URL seperti:
-`https://your-app.railway.app`
+Setelah deploy: `https://your-app.onrender.com`
 
 ## API Endpoints
 
 ### 1. Clustering
 ```
 POST /api/clustering
-Content-Type: multipart/form-data
 
-Parameters:
+Parameters (multipart/form-data):
 - file: CSV/Excel file
-- linkage: ward (default), complete, average
-- metric: euclidean (default), manhattan, cosine
-- n_clusters: 3 (default)
+- linkage: ward|complete|average (default: ward)
+- metric: euclidean|manhattan|cosine (default: euclidean)
+- n_clusters: number (default: 3)
 
 Response:
 {
   "success": true,
-  "message": "Clustering completed successfully",
-  "data": { ... }
+  "data": { cluster results }
 }
 ```
 
-### 2. Convert Shapefile
-```
-POST /api/convert-shapefile
-Content-Type: multipart/form-data
-
-Parameters:
-- cluster_results: cluster_results.json file
-- shapefile_path: path to shapefile (optional)
-
-Response:
-{
-  "success": true,
-  "message": "GeoJSON created successfully"
-}
-```
-
-### 3. Get Results
+### 2. Get Results
 ```
 GET /api/results
 
 Response:
 {
   "success": true,
-  "data": { ... }
+  "data": { cluster results }
 }
 ```
 
-### 4. Get GeoJSON
-```
-GET /api/geojson
-
-Response:
-{ GeoJSON data }
-```
-
-### 5. Health Check
+### 3. Health Check
 ```
 GET /health
-
-Response:
-{
-  "status": "healthy",
-  "service": "Spatial Clustering API"
-}
 ```
 
-## Test Locally
+## Dependencies (Ringan - Tanpa Geopandas)
+- Flask
+- pandas
+- scikit-learn
+- numpy
+- scipy
 
-```bash
-pip install -r requirements.txt
-python app.py
-```
-
-Server akan jalan di http://localhost:5000
-
-## Cara Pakai dari PHP
-
-Setelah deploy, update PHP Anda untuk memanggil Railway API:
-
-```php
-$api_url = 'https://your-app.railway.app/api/clustering';
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $api_url);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-$post_fields = [
-    'file' => new CURLFile($file_path),
-    'linkage' => 'ward',
-    'metric' => 'euclidean',
-    'n_clusters' => 3
-];
-
-curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
-$response = curl_exec($ch);
-curl_close($ch);
-
-$result = json_decode($response, true);
-```
+**Total size: ~200MB** (vs 800MB dengan geopandas)
