@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description='Spatial Clustering Analysis')
     parser.add_argument('data_file', help='Path to data file (CSV or Excel)')
     parser.add_argument('output_file', help='Path to output JSON file')
-    parser.add_argument('--linkage', default='ward', choices=['ward', 'complete', 'average', 'single'],
+    parser.add_argument('--linkage', default='complete', choices=['ward', 'complete', 'average', 'single'],
                         help='Linkage method for hierarchical clustering')
     parser.add_argument('--metric', default='euclidean', choices=['euclidean', 'manhattan', 'cosine'],
                         help='Distance metric')
@@ -100,6 +100,8 @@ def main():
         
         # HITUNG TOTAL PENJUALAN dari semua jenis rokok
         df['Total_Penjualan'] = df[existing_brand_columns].sum(axis=1)
+        df['Rasio_Barang_Terjual'] = df['Total_Penjualan'] / df['Toko_Membeli']
+        df['Rasio_Toko_Membeli'] = df['Toko_Membeli'] / df['Toko_Didatangi']
         
         # Add Toko columns if they don't exist
         if 'Toko_Didatangi' not in df.columns:
@@ -109,8 +111,8 @@ def main():
         if 'Sale_Total' not in df.columns:
             df['Sale_Total'] = 0
         
-        # PILIH KOLOM UNTUK CLUSTERING: Sale_Total, Toko_Didatangi, Toko_Membeli, Total_Penjualan, Latitude, Longitude
-        clustering_columns = ['Sale_Total', 'Toko_Didatangi', 'Toko_Membeli', 'Total_Penjualan', 'Latitude', 'Longitude']
+        # PILIH KOLOM UNTUK CLUSTERING: Sale_Total, Rasio_Barang_Terjual, Rasio_Toko_Membeli, Total_Penjualan, Latitude, Longitude
+        clustering_columns = ['Sale_Total', 'Rasio_Barang_Terjual', 'Rasio_Toko_Membeli', 'Total_Penjualan', 'Latitude', 'Longitude']
         
         # Validate clustering columns exist
         missing_cols = [col for col in clustering_columns if col not in df.columns]
