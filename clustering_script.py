@@ -100,7 +100,7 @@ def main():
         
         # HITUNG TOTAL PENJUALAN dari semua jenis rokok
         df['Total_Penjualan'] = df[existing_brand_columns].sum(axis=1)
-        df['Rasio_Barang_Terjual'] = df['Total_Penjualan'] / df['Toko_Membeli']
+        df['Rata_Rata_Barang_Terjual'] = df['Total_Penjualan'] / df['Toko_Membeli']
         df['Rasio_Toko_Membeli'] = df['Toko_Membeli'] / df['Toko_Didatangi']
         df['rata_rata_nilai_transaksi'] = df['Sale_Total'] / df['Toko_Membeli'] if df['Toko_Membeli'].sum() > 0 else 0
         
