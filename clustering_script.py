@@ -112,8 +112,8 @@ def main():
         if 'Sale_Total' not in df.columns:
             df['Sale_Total'] = 0
         
-        # PILIH KOLOM UNTUK CLUSTERING: Sale_Total, Rasio_Barang_Terjual, Rasio_Toko_Membeli, Total_Penjualan, rata_rata_nilai_transaksi, Latitude, Longitude
-        clustering_columns = ['Sale_Total', 'Rasio_Barang_Terjual', 'Rasio_Toko_Membeli', 'Total_Penjualan', 'rata_rata_nilai_transaksi', 'Latitude', 'Longitude']
+        # PILIH KOLOM UNTUK CLUSTERING: Sale_Total, Rata_Rata_Barang_Terjual, Rasio_Toko_Membeli, Total_Penjualan, rata_rata_nilai_transaksi, Latitude, Longitude
+        clustering_columns = ['Sale_Total', 'Rata_Rata_Barang_Terjual', 'Rasio_Toko_Membeli', 'Total_Penjualan', 'rata_rata_nilai_transaksi', 'Latitude', 'Longitude']
         
         # Validate clustering columns exist
         missing_cols = [col for col in clustering_columns if col not in df.columns]
