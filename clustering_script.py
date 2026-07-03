@@ -6,7 +6,7 @@ import argparse
 import os
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.metrics import silhouette_score, davies_bouldin_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
@@ -244,6 +244,9 @@ def main():
         
         # Calculate Davies-Bouldin Index (DBI)
         dbi_score = davies_bouldin_score(X_scaled, df['Cluster'])
+
+        # Calculate Calinski-Harabasz Index
+        ch_score = calinski_harabasz_score(X_scaled, df['Cluster'])
         
         # Get top 3 brands per kelurahan
         def get_top_brands(row, n=3):
@@ -277,6 +280,7 @@ def main():
             'success': True,
             'silhouette_score': float(silhouette_avg),
             'davies_bouldin_index': float(dbi_score),
+            'calinski_harabasz_index': float(ch_score),
             'num_clusters': n_clusters,
             'linkage': linkage_method,
             'metric': metric,
@@ -295,6 +299,7 @@ def main():
         print(f"Parameters: {n_clusters} clusters, {linkage_method} linkage, {metric} metric")
         print(f"Silhouette Score: {silhouette_avg:.3f}")
         print(f"Davies-Bouldin Index: {dbi_score:.3f}")
+        print(f"Calinski-Harabasz Index: {ch_score:.3f}")
         
     except Exception as e:
         error_result = {
