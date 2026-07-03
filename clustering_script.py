@@ -276,7 +276,6 @@ def main():
         result = {
             'success': True,
             'silhouette_score': float(silhouette_avg),
-            'davies_bouldin_index': float(dbi_score),
             'num_clusters': n_clusters,
             'linkage': linkage_method,
             'metric': metric,
