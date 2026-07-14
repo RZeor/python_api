@@ -303,10 +303,10 @@ def main():
         
         print(f"Clustering completed successfully.")
         print(f"Parameters: {n_clusters} clusters, {linkage_method} linkage, {metric} metric")
-        print(f"Silhouette Score: {silhouette_avg}")
-        print(f"Davies-Bouldin Index: {dbi_score}")
-        print(f"Calinski-Harabasz Index: {ch_score}")
-        
+        print(f"Silhouette Score: {silhouette_avg:.3f}")
+        print(f"Davies-Bouldin Index: {dbi_score:.3f}")
+        print(f"Calinski-Harabasz Index: {ch_score:.3f}")
+
     except Exception as e:
         error_result = {
             'success': False,
