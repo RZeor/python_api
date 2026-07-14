@@ -56,6 +56,12 @@ def main():
         if 'Kecamatan' in df.columns:
             df.rename(columns={'Kecamatan': 'Kelurahan'}, inplace=True)
         
+        # Rename call to Toko_Didatangi and effcall to Toko_Membeli
+        if 'call' in df.columns:
+            df.rename(columns={'call': 'Toko_Didatangi'}, inplace=True)
+        if 'effcall' in df.columns:
+            df.rename(columns={'effcall': 'Toko_Membeli'}, inplace=True)
+        
         # Clean Longitude column if has extra semicolons
         if 'Longitude;;' in df.columns:
             df.rename(columns={'Longitude;;': 'Longitude'}, inplace=True)
