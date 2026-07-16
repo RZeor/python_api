@@ -1,74 +1,134 @@
 # Spatial Clustering Python API
 
-Flask API untuk clustering analysis (tanpa geopandas - peta menggunakan marker point)
+Flask API untuk analisis hierarchical clustering dari file CSV atau Excel. Proyek ini tidak memakai geopandas; hasil visualisasi dibuat sebagai dendrogram, bukan peta.
 
-## Deploy ke Render.com
+## Fitur
 
-### Langkah 1: Push ke GitHub
+- Upload data CSV atau Excel untuk clustering.
+- Parameter clustering bisa diatur lewat request.
+- Hasil analisis disimpan ke JSON dan bisa diambil kembali lewat endpoint hasil.
+- Mendukung output statistik cluster, label kategori potensi, dan dendrogram.
+
+## Struktur Input Data
+
+Script akan mencoba membaca kolom berikut jika tersedia:
+
+- `Sale_Total`
+- `Toko_Didatangi`
+- `Toko_Membeli`
+- `Latitude`
+- `Longitude`
+- Kolom brand seperti `SSB`, `KSN`, `SBS`, `Spc 16`, `SE12`, `SE16`, `BCK`, `LS 12`, `LS 16`, `TRN B`, `Spirit`, `RVL 16`, `LSFB 12`, `RVL M 12`
+
+Kolom `Kecamatan` akan diubah menjadi `Kelurahan` jika ditemukan. Kolom `call` dan `effcall` juga akan dinormalisasi menjadi `Toko_Didatangi` dan `Toko_Membeli`.
+
+## Instalasi
+
+Pastikan menggunakan Python 3.11.13 atau yang kompatibel dengan project ini.
+
 ```bash
-cd python
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin <your-github-repo-url>
-git push -u origin main
+pip install -r requirements.txt
 ```
 
-### Langkah 2: Deploy di Render
-1. Buka https://render.com
-2. Login dengan GitHub
-3. Klik "New +" → "Web Service"
-4. Connect repository Anda
-5. Configure:
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn app:app --timeout 300`
-   - **Plan:** Free
-6. Deploy
+## Menjalankan Lokal
 
-### Langkah 3: Dapatkan URL
-Setelah deploy: `https://your-app.onrender.com`
+```bash
+python app.py
+```
+
+Server akan berjalan di `http://127.0.0.1:5000` atau port dari environment variable `PORT`.
 
 ## API Endpoints
 
-### 1. Clustering
+### Root
+
+```http
+GET /
 ```
+
+Mengembalikan informasi service dan daftar endpoint yang tersedia.
+
+### Clustering
+
+```http
 POST /api/clustering
+```
 
-Parameters (multipart/form-data):
-- file: CSV/Excel file
-- linkage: ward|complete|average (default: ward)
-- metric: euclidean|manhattan|cosine (default: euclidean)
-- n_clusters: number (default: 3)
+Gunakan `multipart/form-data` dengan field berikut:
 
-Response:
+- `file` - file CSV atau Excel
+- `linkage` - `ward`, `complete`, `average`, atau `single` untuk script clustering
+- `metric` - `euclidean`, `manhattan`, atau `cosine`
+- `n_clusters` - jumlah cluster, default `3`
+
+Contoh response sukses:
+
+```json
 {
   "success": true,
-  "data": { cluster results }
+  "message": "Clustering completed successfully",
+  "data": {
+    "silhouette_score": 0.0,
+    "davies_bouldin_index": 0.0,
+    "calinski_harabasz_index": 0.0
+  }
 }
 ```
 
-### 2. Get Results
-```
+### Ambil Hasil Terakhir
+
+```http
 GET /api/results
-
-Response:
-{
-  "success": true,
-  "data": { cluster results }
-}
 ```
 
-### 3. Health Check
-```
+Mengambil hasil clustering terakhir yang tersimpan di `results/cluster_results.json`.
+
+### Health Check
+
+```http
 GET /health
 ```
 
-## Dependencies (Ringan - Tanpa Geopandas)
+Mengembalikan status service.
+
+## Output File
+
+Setelah proses clustering berhasil, aplikasi akan menyimpan:
+
+- `results/cluster_results.json`
+- `results/dendrogram.png`
+
+## Deploy ke Railway
+
+Project ini sudah cocok untuk deployment di Railway.
+
+### Langkah
+
+1. Push project ke GitHub.
+2. Buka https://railway.app dan login dengan akun GitHub.
+3. Klik **New Project** lalu pilih deploy dari GitHub repository.
+4. Hubungkan repository project ini.
+5. Gunakan konfigurasi berikut:
+  - **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
+  - **Start Command:** `gunicorn app:app --timeout 300 --workers 1 --bind 0.0.0.0:$PORT`
+6. Deploy service.
+
+Jika kamu memakai Railway dengan konfigurasi file, buat `railway.json` atau set command tersebut langsung di dashboard Railway.
+
+## Requirements
+
 - Flask
+- Flask-CORS
 - pandas
 - scikit-learn
 - numpy
 - scipy
+- matplotlib
+- openpyxl
+- xlrd
+- gunicorn
 
-**Total size: ~200MB** (vs 800MB dengan geopandas)
+## Catatan
+
+- API ini mengandalkan proses clustering via subprocess pada `clustering_script.py`.
+- Jika file input tidak memiliki semua kolom yang dibutuhkan, script akan mencoba mengisi nilai default untuk beberapa kolom, tetapi sebagian perhitungan tetap bisa gagal jika struktur data terlalu berbeda.
